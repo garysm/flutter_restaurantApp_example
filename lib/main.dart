@@ -1,113 +1,332 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_restaurant_app_example/app/app_colors.dart';
+import 'package:flutter_restaurant_app_example/app/app_theme.dart';
+import 'package:flutter_restaurant_app_example/constants/data/menu_items.dart';
+import 'package:flutter_restaurant_app_example/models/menu_item.dart';
+import 'package:flutter_restaurant_app_example/widgets/app_bar_search.dart';
+
+// A Counter example implemented with riverpod
 
 void main() {
-  runApp(MyApp());
+  runApp(
+    // Adding ProviderScope enables Riverpod for the entire project
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+  const MyApp({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      theme: AppTheme.lightTheme,
+      themeMode: ThemeMode.light,
+      debugShowCheckedModeBanner: false,
+      home: Home(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
+class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    List<MenuItem> items = menuItems;
+
+    Widget _imageScroller(BuildContext context) {
+      return Container(
+        color: Colors.black,
+        height: 250,
+        child: PageView.builder(
+          itemCount: items.length,
+          itemBuilder: (BuildContext context, int index) {
+            MenuItem thisItem = items[index];
+            String dishTypeText;
+            switch (thisItem.type) {
+              case DishType.smallDish:
+                dishTypeText = 'Small Dish';
+                break;
+              case DishType.largeDish:
+                dishTypeText = 'Large Dish';
+                break;
+              case DishType.none:
+                dishTypeText = 'None';
+                break;
+              default:
+                dishTypeText = 'None';
+            }
+            return Stack(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      fit: BoxFit.cover,
+                      image: AssetImage(thisItem.imagePath),
+                    ),
+                  ),
+                  foregroundDecoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                      colors: [
+                        Colors.black.withOpacity(1),
+                        Colors.black.withOpacity(0.0),
+                      ],
+                    ),
+                  ),
+                ),
+                Container(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Container(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 30,
+                                vertical: 20,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    thisItem.name,
+                                    style:
+                                        Theme.of(context).textTheme.headline5,
+                                  ),
+                                  Text(
+                                    dishTypeText,
+                                    style:
+                                        Theme.of(context).textTheme.headline6,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      );
+    }
+
+    Widget _fourthReviewStar(
+        {@required double rating, Color color, double size}) {
+      if (rating < 3.5) {
+        return Icon(Icons.star_outline, color: color, size: size);
+      }
+      if (rating >= 3.5 && rating < 4.0) {
+        return Icon(Icons.star_half, color: color, size: size);
+      }
+      if (rating >= 4.0) {
+        return Icon(Icons.star, color: color, size: size);
+      }
+      return SizedBox();
+    }
+
+    Widget _fifthReviewStar(
+        {@required double rating, Color color, double size}) {
+      if (rating <= 4.0) {
+        return Icon(Icons.star_outline, color: color, size: size);
+      }
+      if (rating > 4.0 && rating <= 4.5) {
+        return Icon(Icons.star_half, color: color, size: size);
+      }
+      if (rating > 4.5) {
+        return Icon(Icons.star, color: color, size: size);
+      }
+      return SizedBox();
+    }
+
+    Widget _itemScrollCards(BuildContext context,
+        {@required double offset, @required bool reversed}) {
+      List<MenuItem> scrollItems = items;
+      if (reversed) {
+        scrollItems = items.reversed.toList();
+      }
+      return Container(
+        height: 200,
+        child: ListView.builder(
+          controller: ScrollController(
+            initialScrollOffset: offset,
+            keepScrollOffset: true,
+          ),
+          scrollDirection: Axis.horizontal,
+          itemCount: scrollItems.length,
+          itemBuilder: (BuildContext context, int index) {
+            MenuItem thisItem = scrollItems[index];
+            return Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              color: AppColors.lightAppBarPink,
+              margin: EdgeInsets.symmetric(
+                horizontal: 16,
+              ),
+              child: Container(
+                constraints: BoxConstraints.expand(
+                  height: 200,
+                  width: 220,
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      height: 125,
+                      decoration: BoxDecoration(
+                        // color: Colors.green,
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(20),
+                        ),
+                        image: DecorationImage(
+                          image: AssetImage(thisItem.imagePath),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      // child: Placeholder(),
+                    ),
+                    Container(
+                      height: 75,
+                      decoration: BoxDecoration(
+                        // color: Colors.red,
+                        borderRadius: BorderRadius.vertical(
+                          bottom: Radius.circular(20),
+                        ),
+                      ),
+                      child: Container(
+                        constraints: BoxConstraints.expand(),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(thisItem.name),
+                            Row(
+                              children: [
+                                Text('${thisItem.rating}'),
+                                Icon(
+                                  Icons.star,
+                                  color: AppColors.reviewStarRed,
+                                  size: 18,
+                                ),
+                                Icon(
+                                  Icons.star,
+                                  color: AppColors.reviewStarRed,
+                                  size: 18,
+                                ),
+                                Icon(
+                                  Icons.star,
+                                  color: AppColors.reviewStarRed,
+                                  size: 18,
+                                ),
+                                // TODO try to combine these widgets into one star count widget
+                                _fourthReviewStar(
+                                  rating: thisItem.rating,
+                                  color: AppColors.reviewStarRed,
+                                  size: 18,
+                                ),
+                                _fifthReviewStar(
+                                    rating: thisItem.rating,
+                                    color: AppColors.reviewStarRed,
+                                    size: 18),
+                                Text('(${thisItem.numberOfReviews})'),
+                                Text('\$${thisItem.price}'),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        elevation: 0,
+        leading: IconButton(
+          icon: FaIcon(FontAwesomeIcons.bars),
+          // TODO implement onPressed
+          onPressed: () {},
+        ),
+        centerTitle: true,
+        title: Text(
+          'Fresh Food',
+          style: Theme.of(context).textTheme.headline3,
+        ),
+        actions: [
+          IconButton(
+            icon: FaIcon(FontAwesomeIcons.shoppingCart),
+            // TODO implement onPressed
+            onPressed: () {},
+          ),
+        ],
+        bottom: AppBarSearchBar(),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _imageScroller(context),
+              const SizedBox(
+                height: 30,
+              ),
+              Container(
+                padding: EdgeInsets.only(left: 30),
+                child: Text(
+                  'Recommended',
+                  style: Theme.of(context)
+                      .textTheme
+                      .headline5
+                      .copyWith(color: AppColors.darkGreyHeadlineColor),
+                ),
+              ),
+              const SizedBox(
+                height: 30,
+              ),
+              _itemScrollCards(context, offset: 400, reversed: false),
+              const SizedBox(
+                height: 30,
+              ),
+              Container(
+                padding: EdgeInsets.only(left: 30),
+                child: Text(
+                  'Popular',
+                  style: Theme.of(context)
+                      .textTheme
+                      .headline5
+                      .copyWith(color: AppColors.darkGreyHeadlineColor),
+                ),
+              ),
+              const SizedBox(
+                height: 30,
+              ),
+              _itemScrollCards(context, offset: 200, reversed: true),
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+        // The read method is an utility to read a provider without listening to it
+        onPressed: () {},
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }
