@@ -318,15 +318,19 @@ class Home extends StatelessWidget {
                 height: 30,
               ),
               _itemScrollCards(context, offset: 200, reversed: true),
+              // Empty Space
+              const SizedBox(
+                height: 100,
+              ),
             ],
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        // The read method is an utility to read a provider without listening to it
-        onPressed: () {},
-        child: const Icon(Icons.add),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   // The read method is an utility to read a provider without listening to it
+      //   onPressed: () {},
+      //   child: const Icon(Icons.add),
+      // ),
     );
   }
 }
